@@ -1,0 +1,22 @@
+# Flagbase Test Docker Compose
+# Usage: docker compose -f docker/docker-compose.test.yml up -d
+# Note: Uses tmpfs for faster test execution and no persistence
+
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: flagbase-postgres-test
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: flagbase
+      POSTGRES_PASSWORD: flagbase
+      POSTGRES_DB: flagbase_test
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flagbase -d flagbase_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
