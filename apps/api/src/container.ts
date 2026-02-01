@@ -6,6 +6,8 @@ import {
   flags,
   flagEnvironmentConfigs,
   sdkKeys,
+  users,
+  sessions,
 } from '@flagbase/database';
 import { config } from './config/index.js';
 import {
@@ -14,13 +16,18 @@ import {
   PostgresFlagRepository,
   PostgresFlagConfigRepository,
   PostgresSDKKeyRepository,
+  PostgresUserRepository,
+  PostgresSessionRepository,
   type ProjectRepository,
   type EnvironmentRepository,
   type FlagRepository,
   type FlagConfigRepository,
   type SDKKeyRepository,
+  type UserRepository,
+  type SessionRepository,
 } from './repositories/index.js';
 import {
+  AuthService,
   ProjectService,
   EnvironmentService,
   FlagService,
@@ -38,8 +45,11 @@ export interface Container {
   flagRepo: FlagRepository;
   flagConfigRepo: FlagConfigRepository;
   sdkKeyRepo: SDKKeyRepository;
+  userRepo: UserRepository;
+  sessionRepo: SessionRepository;
 
   // Services
+  authService: AuthService;
   projectService: ProjectService;
   environmentService: EnvironmentService;
   flagService: FlagService;
@@ -75,8 +85,11 @@ export function createContainer(): Container {
   const flagRepo = new PostgresFlagRepository(db, flags);
   const flagConfigRepo = new PostgresFlagConfigRepository(db, flagEnvironmentConfigs);
   const sdkKeyRepo = new PostgresSDKKeyRepository(db, sdkKeys);
+  const userRepo = new PostgresUserRepository(db, users);
+  const sessionRepo = new PostgresSessionRepository(db, sessions);
 
   // Create services
+  const authService = new AuthService(userRepo, sessionRepo);
   const projectService = new ProjectService(projectRepo);
   const environmentService = new EnvironmentService(environmentRepo, flagRepo, flagConfigRepo);
   const flagService = new FlagService(flagRepo, flagConfigRepo, environmentRepo);
@@ -89,6 +102,9 @@ export function createContainer(): Container {
     flagRepo,
     flagConfigRepo,
     sdkKeyRepo,
+    userRepo,
+    sessionRepo,
+    authService,
     projectService,
     environmentService,
     flagService,

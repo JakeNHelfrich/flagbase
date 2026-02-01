@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 import { createDbClient } from "./client";
 import { users, projects, environments, flags, flagEnvironmentConfigs } from "./schema/index";
-import { createHash } from "crypto";
+import bcrypt from "bcrypt";
 
 config({ path: "../../.env" });
 
@@ -15,9 +15,8 @@ async function seed() {
 
   console.log("Starting seed...");
 
-  // Create a simple password hash (in production, use bcrypt)
-  // This is a SHA-256 hash for demonstration - real app should use bcrypt
-  const passwordHash = createHash("sha256").update("password123").digest("hex");
+  // Hash password using bcrypt with cost factor of 10
+  const passwordHash = await bcrypt.hash("password123", 10);
 
   // Create test user
   const [testUser] = await db

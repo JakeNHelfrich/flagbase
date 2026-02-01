@@ -13,13 +13,13 @@ import {
 
 export function createSDKKeyRoutes(container: Container) {
   const app = new Hono();
-  const { sdkKeyService, projectService, environmentService } = container;
+  const { sdkKeyService, projectService, environmentService, authService } = container;
 
   // Create an SDK key for an environment
   // POST /api/v1/projects/:projectId/environments/:envId/sdk-keys
   app.post(
     '/projects/:projectId/environments/:envId/sdk-keys',
-    requireAuth(),
+    requireAuth(authService),
     requireProjectAccess(),
     validate('json', createSDKKeySchema),
     async (c) => {
@@ -67,7 +67,7 @@ export function createSDKKeyRoutes(container: Container) {
   // GET /api/v1/projects/:projectId/sdk-keys
   app.get(
     '/projects/:projectId/sdk-keys',
-    requireAuth(),
+    requireAuth(authService),
     requireProjectAccess(),
     validate('query', paginationSchema),
     async (c) => {
@@ -100,7 +100,7 @@ export function createSDKKeyRoutes(container: Container) {
   // DELETE /api/v1/sdk-keys/:keyId
   app.delete(
     '/sdk-keys/:keyId',
-    requireAuth(),
+    requireAuth(authService),
     validate('param', sdkKeyIdParamSchema),
     async (c) => {
       const { keyId } = c.req.valid('param');

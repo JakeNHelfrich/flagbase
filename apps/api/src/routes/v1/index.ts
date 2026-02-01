@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import type { Container } from '../../container.js';
+import { createAuthRoutes } from './auth.js';
 import { createProjectRoutes } from './projects.js';
 import { createEnvironmentRoutes } from './environments.js';
 import { createFlagRoutes } from './flags.js';
@@ -7,6 +8,9 @@ import { createSDKKeyRoutes } from './sdk-keys.js';
 
 export function createV1Routes(container: Container) {
   const app = new Hono();
+
+  // Auth routes
+  app.route('/auth', createAuthRoutes(container));
 
   // Project routes
   app.route('/projects', createProjectRoutes(container));

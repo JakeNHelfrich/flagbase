@@ -13,12 +13,12 @@ import {
 
 export function createEnvironmentRoutes(container: Container) {
   const app = new Hono();
-  const { environmentService, projectService } = container;
+  const { environmentService, projectService, authService } = container;
 
   // List environments for a project
   app.get(
     '/',
-    requireAuth(),
+    requireAuth(authService),
     requireProjectAccess(),
     validate('query', paginationSchema),
     async (c) => {
@@ -50,7 +50,7 @@ export function createEnvironmentRoutes(container: Container) {
   // Create an environment
   app.post(
     '/',
-    requireAuth(),
+    requireAuth(authService),
     requireProjectAccess(),
     validate('json', createEnvironmentSchema),
     async (c) => {
@@ -92,7 +92,7 @@ export function createEnvironmentRoutes(container: Container) {
   // Update an environment
   app.patch(
     '/:envId',
-    requireAuth(),
+    requireAuth(authService),
     requireProjectAccess(),
     validate('json', updateEnvironmentSchema),
     async (c) => {
@@ -135,7 +135,7 @@ export function createEnvironmentRoutes(container: Container) {
   // Delete an environment
   app.delete(
     '/:envId',
-    requireAuth(),
+    requireAuth(authService),
     requireProjectAccess(),
     async (c) => {
       const projectId = c.req.param('projectId');

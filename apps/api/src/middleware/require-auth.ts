@@ -1,16 +1,8 @@
 import type { MiddlewareHandler } from 'hono';
+import { getCookie } from 'hono/cookie';
 import type { User } from '@flagbase/types';
-import { isDevelopment } from '../config/index.js';
+import type { AuthService } from '../services/auth-service.js';
 import { ApiError } from '../utils/api-error.js';
-
-// Dev user for development mode
-const DEV_USER: Omit<User, 'passwordHash'> = {
-  id: '00000000-0000-0000-0000-000000000001',
-  email: 'dev@flagbase.local',
-  name: 'Development User',
-  createdAt: new Date('2024-01-01'),
-  updatedAt: new Date('2024-01-01'),
-};
 
 declare module 'hono' {
   interface ContextVariableMap {
@@ -18,22 +10,25 @@ declare module 'hono' {
   }
 }
 
-export function requireAuth(): MiddlewareHandler {
+export function requireAuth(authService: AuthService): MiddlewareHandler {
   return async (c, next) => {
-    if (isDevelopment()) {
-      // In development, use a stub user
-      c.set('user', DEV_USER);
-      return next();
+    const sessionId = getCookie(c, 'session');
+
+    if (!sessionId) {
+      throw ApiError.unauthorized('Authentication required');
     }
 
-    // In production, verify the session token
-    const authHeader = c.req.header('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      throw ApiError.unauthorized('Missing or invalid authorization header');
+    const result = await authService.validateSession(sessionId);
+
+    if (!result.ok) {
+      throw ApiError.unauthorized('Invalid or expired session');
     }
 
-    // TODO: Implement actual session verification
-    // For now, throw unauthorized in non-dev mode
-    throw ApiError.unauthorized('Authentication not implemented for production');
+    if (!result.value) {
+      throw ApiError.unauthorized('Invalid or expired session');
+    }
+
+    c.set('user', result.value);
+    return next();
   };
 }

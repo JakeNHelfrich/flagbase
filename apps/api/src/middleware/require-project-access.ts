@@ -1,20 +1,21 @@
 import type { MiddlewareHandler } from 'hono';
-import { isDevelopment } from '../config/index.js';
+import { ApiError } from '../utils/api-error.js';
 
 /**
  * Middleware to verify user has access to the specified project
- * Currently a stub that allows all access in development
+ * Currently allows access to all authenticated users
  */
 export function requireProjectAccess(): MiddlewareHandler {
   return async (c, next) => {
-    if (isDevelopment()) {
-      // In development, allow all project access
-      return next();
+    // Verify user is authenticated (set by requireAuth middleware)
+    const user = c.get('user');
+
+    if (!user) {
+      throw ApiError.unauthorized('Authentication required');
     }
 
-    // TODO: Implement actual project access verification
-    // - Check if the user has been granted access to the project
-    // - Verify the user's role/permissions for the project
+    // For now, all authenticated users can access all projects
+    // TODO: Implement role-based project access control
     return next();
   };
 }

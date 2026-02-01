@@ -14,12 +14,12 @@ import {
 
 export function createFlagRoutes(container: Container) {
   const app = new Hono();
-  const { flagService, projectService, environmentService } = container;
+  const { flagService, projectService, environmentService, authService } = container;
 
   // List flags for a project
   app.get(
     '/',
-    requireAuth(),
+    requireAuth(authService),
     requireProjectAccess(),
     validate('query', paginationSchema),
     async (c) => {
@@ -51,7 +51,7 @@ export function createFlagRoutes(container: Container) {
   // Create a flag
   app.post(
     '/',
-    requireAuth(),
+    requireAuth(authService),
     requireProjectAccess(),
     validate('json', createFlagSchema),
     async (c) => {
@@ -102,7 +102,7 @@ export function createFlagRoutes(container: Container) {
   // Get a single flag
   app.get(
     '/:flagId',
-    requireAuth(),
+    requireAuth(authService),
     requireProjectAccess(),
     async (c) => {
       const projectId = c.req.param('projectId');
@@ -132,7 +132,7 @@ export function createFlagRoutes(container: Container) {
   // Update a flag
   app.patch(
     '/:flagId',
-    requireAuth(),
+    requireAuth(authService),
     requireProjectAccess(),
     validate('json', updateFlagSchema),
     async (c) => {
@@ -179,7 +179,7 @@ export function createFlagRoutes(container: Container) {
   // Delete a flag
   app.delete(
     '/:flagId',
-    requireAuth(),
+    requireAuth(authService),
     requireProjectAccess(),
     async (c) => {
       const projectId = c.req.param('projectId');
@@ -214,7 +214,7 @@ export function createFlagRoutes(container: Container) {
   // Update flag environment config
   app.patch(
     '/:flagId/environments/:envId',
-    requireAuth(),
+    requireAuth(authService),
     requireProjectAccess(),
     validate('json', updateFlagConfigSchema),
     async (c) => {

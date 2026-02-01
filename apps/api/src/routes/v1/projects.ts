@@ -14,12 +14,12 @@ import {
 
 export function createProjectRoutes(container: Container) {
   const app = new Hono();
-  const { projectService } = container;
+  const { projectService, authService } = container;
 
   // List all projects
   app.get(
     '/',
-    requireAuth(),
+    requireAuth(authService),
     validate('query', paginationSchema),
     async (c) => {
       const { page, limit } = c.req.valid('query');
@@ -39,7 +39,7 @@ export function createProjectRoutes(container: Container) {
   // Create a new project
   app.post(
     '/',
-    requireAuth(),
+    requireAuth(authService),
     validate('json', createProjectSchema),
     async (c) => {
       const body = c.req.valid('json');
@@ -67,7 +67,7 @@ export function createProjectRoutes(container: Container) {
   // Get a single project
   app.get(
     '/:projectId',
-    requireAuth(),
+    requireAuth(authService),
     requireProjectAccess(),
     validate('param', projectIdParamSchema),
     async (c) => {
@@ -89,7 +89,7 @@ export function createProjectRoutes(container: Container) {
   // Update a project
   app.patch(
     '/:projectId',
-    requireAuth(),
+    requireAuth(authService),
     requireProjectAccess(),
     validate('param', projectIdParamSchema),
     validate('json', updateProjectSchema),
@@ -126,7 +126,7 @@ export function createProjectRoutes(container: Container) {
   // Delete a project
   app.delete(
     '/:projectId',
-    requireAuth(),
+    requireAuth(authService),
     requireProjectAccess(),
     validate('param', projectIdParamSchema),
     async (c) => {

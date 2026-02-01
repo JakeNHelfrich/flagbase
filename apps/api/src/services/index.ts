@@ -1,3 +1,4 @@
+export { AuthService } from './auth-service.js';
 export { ProjectService } from './project-service.js';
 export { EnvironmentService } from './environment-service.js';
 export { FlagService } from './flag-service.js';

@@ -1,16 +1,34 @@
-import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
+import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router';
+import { useEffect } from 'react';
 import { AppShell } from '~/components/layout/app-shell';
+import { useAuth } from '~/hooks/use-auth';
 
 export const Route = createFileRoute('/_authenticated')({
   component: AuthenticatedLayout,
-  beforeLoad: async () => {
-    // For now, we're not implementing authentication
-    // In a real app, you'd check for a valid session here
-    // and redirect to login if not authenticated
-  },
 });
 
 function AuthenticatedLayout() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      navigate({ to: '/login' });
+    }
+  }, [isLoading, isAuthenticated, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <AppShell>
       <Outlet />

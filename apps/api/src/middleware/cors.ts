@@ -3,7 +3,9 @@ import { isDevelopment } from '../config/index.js';
 
 export function createCorsMiddleware() {
   return cors({
-    origin: isDevelopment() ? '*' : ['http://localhost:3000'],
+    origin: isDevelopment()
+      ? ['http://localhost:5173', 'http://127.0.0.1:5173']
+      : ['http://localhost:3000'],
     allowHeaders: ['Content-Type', 'Authorization'],
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     exposeHeaders: ['Content-Length'],
