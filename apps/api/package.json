@@ -13,6 +13,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@flagbase/core": "workspace:*",
     "@flagbase/database": "workspace:*",
     "@flagbase/types": "workspace:*",
     "@hono/node-server": "^1.13.0",

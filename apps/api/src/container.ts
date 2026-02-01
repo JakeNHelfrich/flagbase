@@ -32,6 +32,7 @@ import {
   EnvironmentService,
   FlagService,
   SDKKeyService,
+  SDKEvaluationService,
 } from './services/index.js';
 import pino from 'pino';
 
@@ -54,6 +55,7 @@ export interface Container {
   environmentService: EnvironmentService;
   flagService: FlagService;
   sdkKeyService: SDKKeyService;
+  sdkEvaluationService: SDKEvaluationService;
 
   // Logger
   logger: pino.Logger;
@@ -94,6 +96,7 @@ export function createContainer(): Container {
   const environmentService = new EnvironmentService(environmentRepo, flagRepo, flagConfigRepo);
   const flagService = new FlagService(flagRepo, flagConfigRepo, environmentRepo);
   const sdkKeyService = new SDKKeyService(sdkKeyRepo);
+  const sdkEvaluationService = new SDKEvaluationService(flagRepo, flagConfigRepo);
 
   return {
     db,
@@ -109,6 +112,7 @@ export function createContainer(): Container {
     environmentService,
     flagService,
     sdkKeyService,
+    sdkEvaluationService,
     logger,
   };
 }

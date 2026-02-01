@@ -5,6 +5,7 @@ import type { Container } from '../../container.js';
 import { registerSchema, loginSchema } from '../../schemas/auth.js';
 import { ApiError } from '../../utils/api-error.js';
 import { ErrorCode } from '@flagbase/types';
+import { createAuthRateLimiter } from '../../middleware/index.js';
 
 const COOKIE_NAME = 'session';
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 days in seconds
@@ -12,10 +13,12 @@ const COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 days in seconds
 export function createAuthRoutes(container: Container) {
   const app = new Hono();
   const { authService } = container;
+  const authRateLimiter = createAuthRateLimiter();
 
   // Register a new account
   app.post(
     '/register',
+    authRateLimiter,
     zValidator('json', registerSchema),
     async (c) => {
       const { email, password, name } = c.req.valid('json');
@@ -35,6 +38,7 @@ export function createAuthRoutes(container: Container) {
   // Login
   app.post(
     '/login',
+    authRateLimiter,
     zValidator('json', loginSchema),
     async (c) => {
       const { email, password } = c.req.valid('json');

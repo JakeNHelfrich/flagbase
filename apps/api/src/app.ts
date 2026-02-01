@@ -3,14 +3,23 @@ import type { Container } from './container.js';
 import { createCorsMiddleware } from './middleware/cors.js';
 import { createRequestLogger } from './middleware/request-logger.js';
 import { createErrorHandler } from './middleware/error-handler.js';
+import { createSecurityHeaders, createCsrfProtection } from './middleware/index.js';
 import { createV1Routes } from './routes/v1/index.js';
+import { config } from './config/index.js';
 
 export function createApp(container: Container) {
   const app = new Hono();
   const { logger } = container;
 
-  // Global middleware
+  // Global middleware - order matters: security headers → CORS → CSRF → logger
+  const allowedOrigins =
+    config.NODE_ENV === 'development'
+      ? ['http://localhost:5173', 'http://127.0.0.1:5173']
+      : ['http://localhost:3000'];
+
+  app.use('*', createSecurityHeaders());
   app.use('*', createCorsMiddleware());
+  app.use('*', createCsrfProtection(allowedOrigins));
   app.use('*', createRequestLogger(logger));
 
   // Health check endpoint

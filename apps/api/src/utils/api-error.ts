@@ -42,6 +42,14 @@ export class ApiError extends Error {
     return new ApiError(ErrorCode.INTERNAL_ERROR, message, 500);
   }
 
+  static rateLimited(message = 'Too many requests'): ApiError {
+    return new ApiError(ErrorCode.RATE_LIMITED, message, 429);
+  }
+
+  static csrfFailed(message = 'CSRF validation failed'): ApiError {
+    return new ApiError(ErrorCode.CSRF_VALIDATION_FAILED, message, 403);
+  }
+
   toJSON(): { code: ErrorCode; message: string; details?: Record<string, unknown> } {
     const result: { code: ErrorCode; message: string; details?: Record<string, unknown> } = {
       code: this.code,

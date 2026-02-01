@@ -211,6 +211,51 @@ export function createFlagRoutes(container: Container) {
     }
   );
 
+  // Get flag environment config
+  app.get(
+    '/:flagId/environments/:envId',
+    requireAuth(authService),
+    requireProjectAccess(),
+    async (c) => {
+      const projectId = c.req.param('projectId');
+      const flagId = c.req.param('flagId');
+      const envId = c.req.param('envId');
+
+      if (!projectId || !flagId || !envId) {
+        throw ApiError.badRequest(ErrorCode.VALIDATION_ERROR, 'Project ID, Flag ID, and Environment ID are required');
+      }
+
+      // Check if flag exists and belongs to project
+      const flagResult = await flagService.getById(flagId);
+      if (!flagResult.ok || !flagResult.value) {
+        throw ApiError.notFound(ErrorCode.FLAG_NOT_FOUND, 'Flag not found');
+      }
+      if (flagResult.value.projectId !== projectId) {
+        throw ApiError.notFound(ErrorCode.FLAG_NOT_FOUND, 'Flag not found in this project');
+      }
+
+      // Check if environment exists and belongs to project
+      const envResult = await environmentService.getById(envId);
+      if (!envResult.ok || !envResult.value) {
+        throw ApiError.notFound(ErrorCode.ENVIRONMENT_NOT_FOUND, 'Environment not found');
+      }
+      if (envResult.value.projectId !== projectId) {
+        throw ApiError.notFound(ErrorCode.ENVIRONMENT_NOT_FOUND, 'Environment not found in this project');
+      }
+
+      // Get the flag config
+      const configResult = await flagService.getConfigByFlagAndEnvironment(flagId, envId);
+      if (!configResult.ok) {
+        throw ApiError.internal('Failed to fetch flag config');
+      }
+      if (!configResult.value) {
+        throw ApiError.notFound(ErrorCode.FLAG_NOT_FOUND, 'Flag environment config not found');
+      }
+
+      return c.json(configResult.value);
+    }
+  );
+
   // Update flag environment config
   app.patch(
     '/:flagId/environments/:envId',
